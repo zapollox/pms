@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.pmssupplierinfo.dao.PmsSupplierInfoDao">
+    
+	<sql id="pmsSupplierInfoColumns">
+		a.id AS "id",
+		a.company AS "company",
+		a.address AS "address",
+		a.scope AS "scope",
+		a.telphone AS "telphone",
+		a.sign_time AS "signTime",
+		a.year AS "year",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="pmsSupplierInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="PmsSupplierInfo">
+		SELECT 
+			<include refid="pmsSupplierInfoColumns"/>
+		FROM pms_supplier_info a
+		<include refid="pmsSupplierInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PmsSupplierInfo">
+		SELECT 
+			<include refid="pmsSupplierInfoColumns"/>
+		FROM pms_supplier_info a
+		<include refid="pmsSupplierInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="company != null and company != ''">
+				AND a.company LIKE 
+					<if test="dbName == 'oracle'">'%'||#{company}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{company}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{company},'%')</if>
+			</if>
+			<if test="address != null and address != ''">
+				AND a.address LIKE 
+					<if test="dbName == 'oracle'">'%'||#{address}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{address}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{address},'%')</if>
+			</if>
+			<if test="telphone != null and telphone != ''">
+				AND a.telphone = #{telphone}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PmsSupplierInfo">
+		SELECT 
+			<include refid="pmsSupplierInfoColumns"/>
+		FROM pms_supplier_info a
+		<include refid="pmsSupplierInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pms_supplier_info(
+			id,
+			company,
+			address,
+			scope,
+			telphone,
+			sign_time,
+			year,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{company},
+			#{address},
+			#{scope},
+			#{telphone},
+			#{signTime},
+			#{year},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pms_supplier_info SET 	
+			company = #{company},
+			address = #{address},
+			scope = #{scope},
+			telphone = #{telphone},
+			sign_time = #{signTime},
+			year = #{year},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE pms_supplier_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

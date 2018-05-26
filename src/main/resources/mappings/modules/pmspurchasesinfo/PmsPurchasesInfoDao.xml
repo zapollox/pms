@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.pmspurchasesinfo.dao.PmsPurchasesInfoDao">
+    
+	<sql id="pmsPurchasesInfoColumns">
+		a.id AS "id",
+		drug.id AS "pmsDrugInfo.id",
+		drug.name AS "pmsDrugInfo.name",
+		a.purchases_man AS "purchasesMan",
+		a.purchases_date AS "purchasesDate",
+		a.purchases_num AS "purchasesNum",
+		sup.id AS "pmsSupplierInfo.id",
+		sup.company AS "pmsSupplierInfo.company",
+		a.purchases_pric AS "purchasesPric",
+		ware.id AS "pmsWarehouseInfo.id",
+		ware.warehouse_number AS "pmsWarehouseInfo.warehouseNumber",
+		a.batch_num AS "batchNum",
+		a.out_date AS "outDate"
+	</sql>
+	
+	<sql id="pmsPurchasesInfoJoins">
+		LEFT JOIN pms_drug_info drug ON drug.id = a.drug_info_id
+		LEFT JOIN pms_supplier_info sup ON sup.id = a.supplier_id
+		LEFT JOIN pms_warehouse_info ware ON ware.id = a.warehouseinfo_id
+	</sql>
+    
+	<select id="get" resultType="PmsPurchasesInfo">
+		SELECT 
+			<include refid="pmsPurchasesInfoColumns"/>
+		FROM pms_purchases_info a
+		<include refid="pmsPurchasesInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PmsPurchasesInfo">
+		SELECT 
+			<include refid="pmsPurchasesInfoColumns"/>
+		FROM pms_purchases_info a
+		<include refid="pmsPurchasesInfoJoins"/>
+		<where>
+			
+			<if test="pmsDrugInfo != null and pmsDrugInfo.id != null and pmsDrugInfo.id!=''">
+				AND a.drug_info_id = #{pmsDrugInfo.id}
+			</if>
+			<if test="purchasesMan != null and purchasesMan != ''">
+				AND a.purchases_man LIKE 
+					<if test="dbName == 'oracle'">'%'||#{purchasesMan}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{purchasesMan}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{purchasesMan},'%')</if>
+			</if>
+			<if test="beginPurchasesDate != null and endPurchasesDate != null and beginPurchasesDate != '' and endPurchasesDate != ''">
+				AND a.purchases_date BETWEEN #{beginPurchasesDate} AND #{endPurchasesDate}
+			</if>
+			<if test="pmsSupplierInfo != null and pmsSupplierInfo.id != null and pmsSupplierInfo.id !=''">
+				AND a.supplier_id = #{pmsSupplierInfo.id}
+			</if>
+			<if test="pmsWarehouseInfo != null and pmsWarehouseInfo.id !=null and pmsWarehouseInfo.id !=''">
+				AND a.warehouseinfo_id = #{pmsWarehouseInfo.id}
+			</if>
+			<if test="batchNum !=null and batchNum !=''">
+				AND a.batch_num = #{batchNum}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="PmsPurchasesInfo">
+		SELECT 
+			<include refid="pmsPurchasesInfoColumns"/>
+		FROM pms_purchases_info a
+		<include refid="pmsPurchasesInfoJoins"/>
+		<where>
+
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findAllStockPage"
+			resultType="com.thinkgem.jeesite.modules.pmspurchasesinfo.entity.PmsPurchasesInfo">
+		SELECT
+			drug.name AS "pmsDrugInfo.name",
+			SUM(a.purchases_num) AS "purchasesNum",
+			a.batch_num AS "batchNum",
+			a.out_date AS "outDate"
+		FROM pms_purchases_info a
+		LEFT JOIN pms_drug_info drug ON drug.id = a.drug_info_id
+		<where>
+			<if test="pmsDrugInfo != null and pmsDrugInfo.id != null and pmsDrugInfo.id!=''">
+				AND a.drug_info_id = #{pmsDrugInfo.id}
+			</if>
+		</where>
+		GROUP BY drug.name
+	</select>
+
+	<insert id="insert">
+		INSERT INTO pms_purchases_info(
+			id,
+			drug_info_id,
+			purchases_man,
+			purchases_date,
+			purchases_num,
+			supplier_id,
+			purchases_pric,
+			warehouseinfo_id,
+			batch_num,
+		    out_date
+		) VALUES (
+			#{id},
+			#{pmsDrugInfo.id},
+			#{purchasesMan},
+			#{purchasesDate},
+			#{purchasesNum},
+			#{pmsSupplierInfo.id},
+			#{purchasesPric},
+			#{pmsWarehouseInfo.id},
+			#{batchNum},
+			#{outDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pms_purchases_info SET 	
+			drug_info_id = #{pmsDrugInfo.id},
+			purchases_man = #{purchasesMan},
+			purchases_date = #{purchasesDate},
+			purchases_num = #{purchasesNum},
+			supplier_id = #{pmsSupplierInfo.id},
+			purchases_pric = #{purchasesPric},
+			warehouseinfo_id = #{pmsWarehouseInfo.id},
+			batch_num = #{batchNum},
+		    out_date = #{outDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM pms_purchases_info
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

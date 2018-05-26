@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.pmssellinfo.dao.PmsSellInfoDao">
+    
+	<sql id="pmsSellInfoColumns">
+		a.id AS "id",
+		drug.id AS "pmsDrugInfo.id",
+		drug.name AS "pmsDrugInfo.name",
+		a.sell_num AS "sellNum",
+		a.sell_price AS "sellPrice",
+		ware.id AS "pmsWarehouseInfo.id",
+		ware.warehouse_number AS "pmsWarehouseInfo.warehouseNumber",
+		a.batch_num AS "batchNum",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="pmsSellInfoJoins">
+		LEFT JOIN pms_drug_info drug ON a.drug_id = drug.id
+		LEFT JOIN pms_warehouse_info ware ON a.stock_id = ware.id
+	</sql>
+    
+	<select id="get" resultType="PmsSellInfo">
+		SELECT 
+			<include refid="pmsSellInfoColumns"/>
+		FROM pms_sell_info a
+		<include refid="pmsSellInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PmsSellInfo">
+		SELECT 
+			<include refid="pmsSellInfoColumns"/>
+		FROM pms_sell_info a
+		<include refid="pmsSellInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="pmsDrugInfo != null and pmsDrugInfo.id != null and pmsDrugInfo.id !=''">
+				AND drug.id = #{pmsDrugInfo.id}
+			</if>
+			<if test="sellNum != null and sellNum != ''">
+				AND a.sell_num = #{sellNum}
+			</if>
+			<if test="sellPrice != null and sellPrice != ''">
+				AND a.sell_price = #{sellPrice}
+			</if>
+			<if test="pmsWarehouseInfo != null and pmsWarehouseInfo.id != null and pmsWarehouseInfo.id !=''">
+				AND ware.id = #{pmsWarehouseInfo.id}
+			</if>
+			<if test="batchNum != null and batchNum != ''">
+				AND a.batch_num = #{batchNum}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PmsSellInfo">
+		SELECT 
+			<include refid="pmsSellInfoColumns"/>
+		FROM pms_sell_info a
+		<include refid="pmsSellInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pms_sell_info(
+			id,
+			drug_id,
+			sell_num,
+			sell_price,
+			stock_id,
+			batch_num,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{pmsDrugInfo.id},
+			#{sellNum},
+			#{sellPrice},
+			#{pmsWarehouseInfo.id},
+			#{batchNum},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pms_sell_info SET 	
+			drug_id = #{pmsDrugInfo.id},
+			sell_num = #{sellNum},
+			sell_price = #{sellPrice},
+			stock_id = #{pmsWarehouseInfo.id},
+			batch_num = #{batchNum},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE pms_sell_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

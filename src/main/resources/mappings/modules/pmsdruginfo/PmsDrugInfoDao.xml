@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.pmsdruginfo.dao.PmsDrugInfoDao">
+    
+	<sql id="pmsDrugInfoColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.dosage_forms AS "dosageForms",
+		a.drug_type AS "drugType",
+		a.attribute AS "attribute",
+		a.size AS "size",
+		a.component AS "component",
+		a.effect AS "effect",
+		a.license_no AS "licenseNo",
+		a.license_date AS "licenseDate",
+		a.produce_company AS "produceCompany",
+		a.produce_address AS "produceAddress",
+		a.standard_code AS "standardCode",
+		sup.id AS "pmsSupplierInfo.id",
+		sup.company AS "pmsSupplierInfo.company",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="pmsDrugInfoJoins">
+		LEFT JOIN pms_supplier_info sup ON sup.id = a.supplier_id
+	</sql>
+    
+	<select id="get" resultType="PmsDrugInfo">
+		SELECT 
+			<include refid="pmsDrugInfoColumns"/>
+		FROM pms_drug_info a
+		<include refid="pmsDrugInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PmsDrugInfo">
+		SELECT 
+			<include refid="pmsDrugInfoColumns"/>
+		FROM pms_drug_info a
+		<include refid="pmsDrugInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="dosageForms != null and dosageForms != ''">
+				AND a.dosage_forms = #{dosageForms}
+			</if>
+			<if test="drugType != null and drugType != ''">
+				AND a.drug_type = #{drugType}
+			</if>
+			<if test="produceCompany != null and produceCompany != ''">
+				AND a.produce_company = #{produceCompany}
+			</if>
+			<if test="pmsSupplierInfo != null and pmsSupplierInfo.id != null and pmsSupplierInfo.id !=''">
+				AND a.supplier_id = #{pmsSupplierInfo.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PmsDrugInfo">
+		SELECT 
+			<include refid="pmsDrugInfoColumns"/>
+		FROM pms_drug_info a
+		<include refid="pmsDrugInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO pms_drug_info(
+			id,
+			name,
+			dosage_forms,
+			drug_type,
+			attribute,
+			size,
+			component,
+			effect,
+			license_no,
+			license_date,
+			produce_company,
+			produce_address,
+			standard_code,
+			supplier_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{dosageForms},
+			#{drugType},
+			#{attribute},
+			#{size},
+			#{component},
+			#{effect},
+			#{licenseNo},
+			#{licenseDate},
+			#{produceCompany},
+			#{produceAddress},
+			#{standardCode},
+			#{pmsSupplierInfo.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE pms_drug_info SET 	
+			name = #{name},
+			dosage_forms = #{dosageForms},
+			drug_type = #{drugType},
+			attribute = #{attribute},
+			size = #{size},
+			component = #{component},
+			effect = #{effect},
+			license_no = #{licenseNo},
+			license_date = #{licenseDate},
+			produce_company = #{produceCompany},
+			produce_address = #{produceAddress},
+			standard_code = #{standardCode},
+			supplier_id = #{pmsSupplierInfo.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE pms_drug_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
