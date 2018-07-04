@@ -624,7 +624,25 @@
 				</exclusion>
 			</exclusions>
 		</dependency> -->
-		
+		<!--MD5加密-->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.11</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.7</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.47</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -749,6 +767,7 @@
 					</dependency>
 				</dependencies>
 			</plugin> -->
+
 
 			<!-- war 打包插件, 设定war包名称不带版本号 -->
 			<plugin>
